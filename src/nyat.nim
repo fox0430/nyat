@@ -31,6 +31,8 @@ proc parseCommnadLineParams(line: seq[string]): FileNameAndOption =
       result.options.add(line[i])
     else:
       result.fileNameList.add(line[i])
+      
+proc parseCommanLineOption(options: seq[string]) = discard
 
 proc setBufferList(fileNameList: seq[string]): seq[seq[Rune]] =
   result = @[]
