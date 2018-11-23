@@ -1,2 +1,2 @@
 # nyat
-nyat is cat clone. Written in nim.
+nyat is cat clone. Written in nim. 😺
