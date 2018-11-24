@@ -62,7 +62,7 @@ proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
 proc displayBuffer(buffer: seq[string], optionList: OptionList) =
     for i in 0 ..< buffer.len:
       if optionList.setLineNumber:
-        stdout.write $i & " "
+        stdout.write $i & " ".repeat(($buffer.len).len - ($i).len + 1)
       echo buffer[i]
 
 when isMainModule:
@@ -77,5 +77,5 @@ when isMainModule:
       bufferList = setBufferList(line.fileNameList)
       buffer = concatenateBuffer(bufferList)
 
-    var optionList = parseCommanLineOption(line.options)
+    let optionList = parseCommanLineOption(line.options)
     displayBuffer(buffer, optionList)
