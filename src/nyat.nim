@@ -52,7 +52,8 @@ proc parseCommanLineOption(options: seq[char]): OptionList =
       of 'n':
         result.setLineNumber = true
       else:
-        echo "invalid option: " & options[i]
+        echo "invalid option: -" & options[i]
+        quit()
 
 proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
   result = @[]
