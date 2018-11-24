@@ -62,7 +62,7 @@ proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
 proc displayBuffer(buffer: seq[string], optionList: OptionList) =
     for i in 0 ..< buffer.len:
       if optionList.setLineNumber:
-        stdout.write $i & " ".repeat(($buffer.len).len - ($i).len + 1)
+        stdout.write $(i + 1) & " ".repeat(($buffer.len).len - ($i).len + 2)
       echo buffer[i]
 
 when isMainModule:
