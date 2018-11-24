@@ -1,43 +1,69 @@
 import os, unicode, sequtils, posix
 
 type
-  FileNameAndOption = tuple[fileNameList, options: seq[string]]
+  FileNameAndOption = tuple[fileNameList: seq[string], options: seq[char]]
+  OptionList = tuple[setLineNumber: bool]
 
-proc openFile(fileName: string): seq[Rune] =
+proc initOptionList(): OptionList =
+  result.setLineNumber = false
+
+proc parseBuffer(buffer: string): seq[string] =
+  result = newSeq[string]()
+  var line  = ""
+  for i in 0 ..< buffer.len:
+    if buffer[i] == '\n':
+      result.add(line)
+      line = ""
+    else:
+      line.add(buffer[i])
+
+proc openFile(fileName: string): seq[string] =
   if existsFile(fileName) == false:
     echo "No such file"
-    quit()
 
   try:
     let buffer = readFile(fileName)
-    return buffer.toRunes
+    let newBuffer = parseBuffer(buffer)
+    return newBuffer
+
   except IOError:
     echo "IOError: Failed to open file"
+    quit()
   except OSError:
     echo "OSError: Failed to open file"
+    quit()
 
-proc displayBuffer(buffer: seq[Rune]) =
-  echo buffer
-
-proc concatenateBuffer(bufferList: seq[seq[Rune]]): seq[Rune] =
+proc concatenateBuffer(bufferList: seq[seq[string]]): seq[string] =
   result = @[]
   for i in 0 ..< bufferList.len:
     result = concat(result, bufferList[i])
 
 proc parseCommnadLineParams(line: seq[string]): FileNameAndOption =
-
   for i in 0 ..< line.len:
     if line[i][0] == '-':
-      result.options.add(line[i])
+      result.options.add(line[i][1])
     else:
       result.fileNameList.add(line[i])
       
-proc parseCommanLineOption(options: seq[string]) = discard
+proc parseCommanLineOption(options: seq[char]): OptionList =
+  result = initOptionList()
+  for i in 0 ..< options.len:
+    case options[i]:
+      of 'n':
+        result.setLineNumber = true
+      else:
+        echo "invalid option: " & options[i]
 
-proc setBufferList(fileNameList: seq[string]): seq[seq[Rune]] =
+proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
   result = @[]
   for i in 0 ..< fileNameList.len:
     result.add(openFile(fileNameList[i]))
+
+proc displayBuffer(buffer: seq[string], optionList: OptionList) =
+    for i in 0 ..< buffer.len:
+      if optionList.setLineNumber:
+        stdout.write $i & " "
+      echo buffer[i]
 
 when isMainModule:
   if commandLineParams().len == 0:
@@ -51,4 +77,5 @@ when isMainModule:
       bufferList = setBufferList(line.fileNameList)
       buffer = concatenateBuffer(bufferList)
 
-    displayBuffer(buffer)
+    var optionList = parseCommanLineOption(line.options)
+    displayBuffer(buffer, optionList)
