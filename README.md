@@ -9,5 +9,3 @@ nimble install https://github.com/fox0430/nyat
 - Add options
 
 - Syntax highlighting
-
-- Display line number
