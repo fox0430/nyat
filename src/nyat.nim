@@ -23,8 +23,7 @@ proc openFile(fileName: string): seq[string] =
 
   try:
     let buffer = readFile(fileName)
-    let newBuffer = parseBuffer(buffer)
-    return newBuffer
+    result = parseBuffer(buffer)
 
   except IOError:
     echo "IOError: Failed to open file"
