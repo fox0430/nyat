@@ -2,10 +2,14 @@ import os, unicode, sequtils, posix
 
 type
   FileNameAndOption = tuple[fileNameList: seq[string], options: seq[char]]
-  OptionList = tuple[setLineNumber: bool]
+  OptionList = tuple[
+    setLineNumber: bool,
+    ignoreBlankAndSetLineNumber: bool
+  ]
 
 proc initOptionList(): OptionList =
   result.setLineNumber = false
+  result.ignoreBlankAndSetLineNumber = false
 
 proc parseBuffer(buffer: string): seq[string] =
   result = newSeq[string]()
@@ -50,6 +54,8 @@ proc parseCommanLineOption(options: seq[char]): OptionList =
     case options[i]:
       of 'n':
         result.setLineNumber = true
+      of 'b':
+        result.ignoreBlankAndSetLineNumber = true
       else:
         echo "invalid option: -" & options[i]
         quit()
@@ -61,9 +67,13 @@ proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
 
 proc displayBuffer(buffer: seq[string], optionList: OptionList) =
     for i in 0 ..< buffer.len:
-      if optionList.setLineNumber:
+      if optionList.ignoreBlankAndSetLineNumber and buffer[i] == "":
+        discard
+      elif optionList.setLineNumber or optionList.ignoreBlankAndSetLineNumber:
         stdout.write $(i + 1) & " ".repeat(($buffer.len).len - ($i).len + 2)
-      echo buffer[i]
+        echo buffer[i]
+      else:
+        echo buffer[i]
 
 when isMainModule:
   if commandLineParams().len == 0:
