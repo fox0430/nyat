@@ -4,12 +4,14 @@ type
   FileNameAndOption = tuple[fileNameList: seq[string], options: seq[char]]
   OptionList = tuple[
     setLineNumber: bool,
-    ignoreBlankAndSetLineNumber: bool
+    numberNoBlank: bool,
+    squeezeBlank: bool
   ]
 
 proc initOptionList(): OptionList =
   result.setLineNumber = false
-  result.ignoreBlankAndSetLineNumber = false
+  result.numberNoBlank = false
+  result.squeezeBlank = false
 
 proc parseBuffer(buffer: string): seq[string] =
   result = newSeq[string]()
@@ -55,7 +57,9 @@ proc parseCommanLineOption(options: seq[char]): OptionList =
       of 'n':
         result.setLineNumber = true
       of 'b':
-        result.ignoreBlankAndSetLineNumber = true
+        result.numberNoBlank = true
+      of 's':
+        result.squeezeBlank = true
       else:
         echo "invalid option: -" & options[i]
         quit()
@@ -67,9 +71,11 @@ proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
 
 proc displayBuffer(buffer: seq[string], optionList: OptionList) =
     for i in 0 ..< buffer.len:
-      if optionList.ignoreBlankAndSetLineNumber and buffer[i] == "":
+      if i < buffer.high - 1 and optionList.squeezeBlank and buffer[i] == "" and  buffer[i + 1] == "":
         discard
-      elif optionList.setLineNumber or optionList.ignoreBlankAndSetLineNumber:
+      elif optionList.numberNoBlank and buffer[i] == "":
+        discard
+      elif optionList.setLineNumber or optionList.numberNoBlank:
         stdout.write $(i + 1) & " ".repeat(($buffer.len).len - ($i).len + 2)
         echo buffer[i]
       else:
