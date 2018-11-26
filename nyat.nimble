@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.0"
+version       = "0.3.1"
 author        = "fox0430"
 description   = "cat clone"
 license       = "MIT"
