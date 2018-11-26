@@ -2,10 +2,16 @@ import os, unicode, sequtils, posix
 
 type
   FileNameAndOption = tuple[fileNameList: seq[string], options: seq[char]]
-  OptionList = tuple[setLineNumber: bool]
+  OptionList = tuple[
+    setLineNumber: bool,
+    numberNoBlank: bool,
+    squeezeBlank: bool
+  ]
 
 proc initOptionList(): OptionList =
   result.setLineNumber = false
+  result.numberNoBlank = false
+  result.squeezeBlank = false
 
 proc parseBuffer(buffer: string): seq[string] =
   result = newSeq[string]()
@@ -23,8 +29,7 @@ proc openFile(fileName: string): seq[string] =
 
   try:
     let buffer = readFile(fileName)
-    let newBuffer = parseBuffer(buffer)
-    return newBuffer
+    result = parseBuffer(buffer)
 
   except IOError:
     echo "IOError: Failed to open file"
@@ -51,6 +56,10 @@ proc parseCommanLineOption(options: seq[char]): OptionList =
     case options[i]:
       of 'n':
         result.setLineNumber = true
+      of 'b':
+        result.numberNoBlank = true
+      of 's':
+        result.squeezeBlank = true
       else:
         echo "invalid option: -" & options[i]
         quit()
@@ -60,11 +69,32 @@ proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
   for i in 0 ..< fileNameList.len:
     result.add(openFile(fileNameList[i]))
 
-proc displayBuffer(buffer: seq[string], optionList: OptionList) =
+proc displayBuffer(buffer: seq[string], option: OptionList) =
+    var
+      lineNumber = 1
+      writeLine = ""
+      ignoreLine = false
+
     for i in 0 ..< buffer.len:
-      if optionList.setLineNumber:
-        stdout.write $(i + 1) & " ".repeat(($buffer.len).len - ($i).len + 2)
-      echo buffer[i]
+      if i < buffer.high and option.squeezeBlank:
+        if buffer[i] == "" and buffer[i + 1] == "":
+          ignoreLine = true
+
+      if option.numberNoBlank:
+        if buffer[i] != "":
+          writeLine = "  " & $lineNumber & "  "
+          lineNumber.inc
+        else:
+          writeLine = ""
+
+      if option.setLineNumber:
+          writeLine = "  " & $lineNumber & "  "
+          lineNumber.inc
+
+      if ignoreLine == false:
+        echo writeLine & buffer[i]
+
+      ignoreLine = false
 
 when isMainModule:
   if commandLineParams().len == 0:
