@@ -69,17 +69,32 @@ proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
   for i in 0 ..< fileNameList.len:
     result.add(openFile(fileNameList[i]))
 
-proc displayBuffer(buffer: seq[string], optionList: OptionList) =
+proc displayBuffer(buffer: seq[string], option: OptionList) =
+    var
+      lineNumber = 1
+      writeLine = ""
+      ignoreLine = false
+
     for i in 0 ..< buffer.len:
-      if i < buffer.high - 1 and optionList.squeezeBlank and buffer[i] == "" and  buffer[i + 1] == "":
-        discard
-      elif optionList.numberNoBlank and buffer[i] == "":
-        discard
-      elif optionList.setLineNumber or optionList.numberNoBlank:
-        stdout.write $(i + 1) & " ".repeat(($buffer.len).len - ($i).len + 2)
-        echo buffer[i]
-      else:
-        echo buffer[i]
+      if i < buffer.high and option.squeezeBlank:
+        if buffer[i] == "" and buffer[i + 1] == "":
+          ignoreLine = true
+
+      if option.numberNoBlank:
+        if buffer[i] != "":
+          writeLine = "  " & $lineNumber & "  "
+          lineNumber.inc
+        else:
+          writeLine = ""
+
+      if option.setLineNumber:
+          writeLine = "  " & $lineNumber & "  "
+          lineNumber.inc
+
+      if ignoreLine == false:
+        echo writeLine & buffer[i]
+
+      ignoreLine = false
 
 when isMainModule:
   if commandLineParams().len == 0:
