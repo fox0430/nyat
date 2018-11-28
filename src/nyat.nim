@@ -1,4 +1,4 @@
-import os, unicode, sequtils, posix
+import os, unicode, sequtils, posix, strutils
 
 type
   FileNameAndOption = tuple[fileNameList: seq[string], options: seq[char]]
@@ -69,11 +69,16 @@ proc setBufferList(fileNameList: seq[string]): seq[seq[string]] =
   for i in 0 ..< fileNameList.len:
     result.add(openFile(fileNameList[i]))
 
+proc setLineNumber(digit, currentNumber: int): string =
+  return " ".repeat(2) & $currentNumber & " ".repeat(digit - ($(currentNumber)).len + 1)
+
 proc displayBuffer(buffer: seq[string], option: OptionList) =
     var
       lineNumber = 1
       writeLine = ""
       ignoreLine = false
+
+    let lineNumberDigit = ($buffer.len).len
 
     for i in 0 ..< buffer.len:
       if i < buffer.high and option.squeezeBlank:
@@ -82,19 +87,19 @@ proc displayBuffer(buffer: seq[string], option: OptionList) =
 
       if option.numberNoBlank:
         if buffer[i] != "":
-          writeLine = "  " & $lineNumber & "  "
+          writeLine = setLineNumber(lineNumberDigit, lineNumber)
           lineNumber.inc
         else:
           writeLine = ""
-
-      if option.setLineNumber:
-          writeLine = "  " & $lineNumber & "  "
+      elif option.setLineNumber:
+          writeLine = setLineNumber(lineNumberDigit, lineNumber)
           lineNumber.inc
 
       if ignoreLine == false:
-        echo writeLine & buffer[i]
+        echo $writeLine & buffer[i]
 
       ignoreLine = false
+      writeLine = ""
 
 when isMainModule:
   if commandLineParams().len == 0:
