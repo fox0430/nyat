@@ -6,9 +6,9 @@ nyat is cat clone. Written in nim. (=^・・^=)
 
 -n    Display line number
 
--b    number nonempty output lines
+-b    Number nonempty output lines
 
--s    suppress repeated empty output lines
+-s    Suppress repeated empty output lines
 
 ## Installation
 ```sh
